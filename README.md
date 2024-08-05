@@ -17,6 +17,8 @@ Infrastructure Solutions smartsheet tooling
 # CommonSpirit Health®
 # e: aaron.surina@commonspirit.org | c: 707.200.4372
 # python code below:
+``` python
+
 import json
 import os
 
@@ -49,7 +51,7 @@ def main():
 
     with open('config.json', 'w') as config_file:
         json.dump(config, config_file, indent=4)
-    
+
     print("\nConfiguration saved to config.json")
 
     # Instructions for setting up the GitHub webhook
@@ -61,4 +63,3 @@ def main():
 if __name__ == "__main__":
     main()
 
->>>>>>> d3107cb (Smartsheet integration with healthcare infrastructure agenda including nursecall and others)

@@ -1,0 +1,64 @@
+import smartsheet
+import os
+import json
+import requests
+from flask import Flask, request, jsonify
+
+# Load configuration
+with open('config.json', 'r') as config_file:
+    config = json.load(config_file)
+
+# Initialize the Smartsheet client with your API token
+SMARTSHEET_API_TOKEN = config['SMARTSHEET_API_TOKEN']
+smartsheet_client = smartsheet.Smartsheet(SMARTSHEET_API_TOKEN)
+
+# Function to update Smartsheet from GitHub changes
+def update_idf_patch_panel(changes):
+    sheet_id = config['sheet_id']
+    column_id = config['column_id']
+    for change in changes:
+        if 'idf_patch_panel' in change['filename']:
+            try:
+                # Extract data from the GitHub file
+                response = requests.get(change['raw_url'])
+                response.raise_for_status()
+                data = response.json()
+                
+                # Update the corresponding Smartsheet
+                rows = []
+                for item in data:
+                    row = smartsheet.models.Row()
+                    row.to_top = True
+                    row.cells.append({
+                        'column_id': column_id,
+                        'value': item['port_assignment']
+                    })
+                    rows.append(row)
+                
+                smartsheet_client.Sheets.add_rows(sheet_id, rows)
+            except requests.exceptions.RequestException as e:
+                print(f"Error fetching data from GitHub: {e}")
+            except smartsheet.exceptions.SmartsheetException as e:
+                print(f"Error updating Smartsheet: {e}")
+
+# Example GitHook event handler
+def handle_github_event(event):
+    try:
+        payload = json.loads(event['body'])
+        if payload['action'] in ['push', 'pull_request']:
+            changes = payload['commits'][0]['modified']
+            update_idf_patch_panel(changes)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON payload: {e}")
+
+# Flask app to receive GitHub webhook events
+app = Flask(__name__)
+
+@app.route('/github-webhook', methods=['POST'])
+def github_webhook():
+    event = request.get_json()
+    handle_github_event(event)
+    return '', 200
+
+if __name__ == '__main__':
+    app.run(port=5000)

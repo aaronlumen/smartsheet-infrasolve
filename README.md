@@ -14,8 +14,8 @@ Infrastructure Solutions smartsheet tooling
 # LV Solutions Architect III
 # Enterprise Infrastructure Architecture
 # Planning, Design & Construction | National Real Estate Services
-# CommonSpirit Health®
-# e: aaron.surina@commonspirit.org | c: 707.200.4372
+# 
+# e: aaron.surina@gmail.com | c: 707.200.4372
 # python code below:
 ``` python
 
